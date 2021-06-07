@@ -197,3 +197,26 @@ Il faut maintenant pouvoir renseigner en tant que compte cible :
 Ajouter les champs nécessaires dans les modèles.
 
 Ajouter la possibilité de renseigner le compte millésimé dans le builder. On doit pouvoir renseigner soit un compte soit un compte millésimé mais pas les deux en même temps.
+
+
+## Étape 6 : Refacto
+
+On pourrait aller bien plus loin dans le métier et chercher à représenter d'autres aspects manquants de la règle de régul. On pourrait aussi explorer d'autres règles comme les règles d'acquisition qui ont des champs en commun avec les règles de régul. Mais on va s'arrêter là en termes d'implémentation du métier.
+
+À ce stade, on a un beau Builder qui a un gros avantage par rapport à l'objet de base : on peut beaucoup plus difficilement oublier des champs importants. Autre aspect intéressant avec ce builder est qu'on a quasiment pas touché à la modélisation des objets métier. On peut donc faire des builders sûrs qui buildent des modèles anémiques.
+
+Ceci-dit, le builder est assez gros, il y a beaucoup d'interfaces, certaines parties sont compliqués à lire (notamment ce qui marche ensemble comme tout ce qui a rapport au seuil). Ce builder a donc besoin d'un refacto.
+
+Idées de refacto du builder :
+- Est-ce qu'on peut éviter d'avoir deux méthodes pour avoir les comptes cible ?
+- Est-ce qu'on peut éviter d'avoir tous les champs liés au seuil au même niveau que tout le reste ?
+  Par exemple en ayant ce genre de code :
+
+  ```csharp  
+  .AvecSeuilConsecutif(s => 
+    s.Seuil(30)
+    .Plafond(90)
+    .Mode(ModePeriodeSeuil.Depuis12Mois)
+  )
+  ```
+  C'est pas grand chose, mais ça permet de mieux catégoriser les champs visuellement.
