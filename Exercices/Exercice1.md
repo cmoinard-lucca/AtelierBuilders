@@ -46,3 +46,26 @@ Cependant certains tests ont besoin de renseigner d'autres comptes, par exemple 
 - Compte cible : RTT
 
 Rajouter la possibilité de changer les comptes au sein du Builder.
+
+
+## Étape 2 : Fluent
+
+Tout ça marche bien mais on peut écrire n'importe quoi, du genre :
+```csharp
+var regul =
+    new RegulBuilder()
+        .ComptesImpactants(Comptes.Maladie, Comptes.Teletravail)
+        .CompteCible(Comptes.Cp2020)
+        .CompteCible(Comptes.Cp2021)
+        .CompteCible(Comptes.Rtt)
+        .ComptesImpactants(Comptes.FormationInterne)
+        .Build();
+```
+
+Convertir le builder actuel en Builder Fluent pour pouvoir guider la construction :
+1. Instanciation du Builder
+2. Comptes impactants (valeurs par défaut si non renseigné)
+3. Compte cible (valeur par défaut si non renseigné)
+4. Build
+
+S'assurer qu'on puisse appeler Build à chaque étape.
