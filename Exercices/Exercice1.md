@@ -173,3 +173,27 @@ Avec un seuil à 30, la régul génèrera donc une écriture avec 1 de débit
 Ajouter les champs liés au seuil/plafond dans l'objet de Regul.
 
 Gérer les champs liés au seuil/plafond dans le builder de Regul.
+
+
+## Étape 5 : Catégories de compte cible
+
+Il existe deux grands types de comptes dans Figgo, les comptes simples (ex: Maladie, Télétravail...) et les comptes millésimés (ex: Congés payés). Un compte millésimé est constitué d'une catégorie de compte qui englobera tous les comptes qui lui sont rattachés.
+
+Par exemple, on a une catégorie de compte « Congés payés » à laquelle sont rattachés les comptes suivants :
+- CP 2020/2021
+- CP 2021/2022
+- CP 2022/2023
+- ...
+
+Une catégorie de comptes est constitué de
+- un identifiant
+- un nom
+- la liste des comptes qui lui sont rattachés
+
+Il faut maintenant pouvoir renseigner en tant que compte cible :
+- soit un compte simple
+- soit un compte millésimé
+
+Ajouter les champs nécessaires dans les modèles.
+
+Ajouter la possibilité de renseigner le compte millésimé dans le builder. On doit pouvoir renseigner soit un compte soit un compte millésimé mais pas les deux en même temps.
