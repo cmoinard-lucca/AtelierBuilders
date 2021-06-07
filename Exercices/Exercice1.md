@@ -134,3 +134,42 @@ Nouvelle demande, on a besoin de l'identifiant du réglementaire dans la règle 
 Ce réglementaire est lié à certaines entités légales et le code utilisant nos règles de régul a besoin de vérifier si les entités légales de la population sont bien comprises dans le réglementaire. Ce qui veut dire que la population doit aussi avoir cet identifiant de réglementaire renseigné. Le rajouter dans le builder de population, cette étape est obligatoire et il n'y a pas de valeur par défaut.
 
 S'assurer qu'on ne puisse pas renseigner un id de réglementaire dans le builder de population qui soit différent de celui renseigné par le builder principal. Essayez de résoudre cette contrainte non pas avec une exception, mais juste par design.
+
+
+## Étape 4 : Seuil et plafond
+
+Un nouveau besoin est demandé par les clients, le fait de pouvoir mettre un seuil et un plafond pour les réguls.
+
+En effet, certains clients aimeraient que le décompte des jours ne se fasse qu'après un certain nombre de jours d'absence, c'est le seuil.
+
+Aussi, pour éviter de se faire sucrer tous leurs congés à cause d'une maladie longue durée, certains clients aimeraient avoir un plafond au-delà duquel la règul arrêtera de retirer des jours, c'est le plafond.
+
+Le calcul du seuil et du plafond dépend de deux autres paramètres :
+- La consécutivité (ou pas) des jours impactant
+- Le mode de calcul de la période de seuil
+  - Sur la période de calcul
+  - Depuis le début de l'acquisition
+  - Depuis les 12 derniers mois
+
+Le seuil et le plafond sont complètement facultatifs. Cependant, si l'un des deux est renseigné il faut obligatoirement savoir s'ils sont consécutifs ou pas. Le mode de calcul est par défaut sur la période de calcul, mais il faut aussi pouvoir le changer.
+
+### Explications métier (pour les passionné·e·s de calculs tordus)
+
+Pour reprendre l'exemple du tout début de l'exercice : si on a crédité 2 jours de Congés Payés sur le mois de février 2021 (4 semaines de 5 jours) et qu'un utilisateur était en Arrêt Maladie consécutif pendant 35 jours (20 jours en janvier et 15 en février), on aimerait lui retirer des jours au prorata à partir du 30e jour d'absence consécutif.
+
+Détail du calcul (pour les passionné·e·s de calculs tordus) :
+- Nombre de jours de travail sur le mois : 4 semaines de 5 jours = 20 jours
+- Nombre de jours de travail à prendre en compte : 10 jours
+  - Seuil atteint le 10e jour ouvré de février car on a 20 jours en janvier, il reste donc 10 (30-20) jours avant d'atteindre le seuil
+  - Nombre de jours à vraiment considerer sur le mois = nombre_jours_mois - reste_jours_seuil = 20 - 10 = 10
+- Nombre de jours d'absence d'arrêt maladie au delà du seuil sur le mois : 5 jours
+- Ratio d'absence : jours_absence / nombre_de_jours_a_considerer = 5 / 10 = 0.5
+- Débit issu de la régul : ratio * nombre_de_jours_crédités = 0.5 * 2 = 1
+
+Avec un seuil à 30, la régul génèrera donc une écriture avec 1 de débit
+
+### Instructions
+
+Ajouter les champs liés au seuil/plafond dans l'objet de Regul.
+
+Gérer les champs liés au seuil/plafond dans le builder de Regul.
