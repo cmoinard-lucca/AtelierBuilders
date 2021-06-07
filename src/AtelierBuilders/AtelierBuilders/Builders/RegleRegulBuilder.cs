@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AtelierBuilders.Models;
@@ -5,11 +6,16 @@ using AtelierBuilders.Models;
 namespace AtelierBuilders.Builders
 {
     public class RegleRegulBuilder :
+        RegleRegulBuilder.IRacine,
         RegleRegulBuilder.IComptesImpactants, RegleRegulBuilder.IComptesImpactants.IResult, 
         RegleRegulBuilder.ICompteCible, RegleRegulBuilder.ICompteCible.IResult,
         RegleRegulBuilder.IPopulation, RegleRegulBuilder.IPopulation.IResult,
         RegleRegulBuilder.IBuild
     {
+        public interface IRacine : IComptesImpactants, ICompteCible, IPopulation, IBuild
+        {
+        }
+        
         public interface IComptesImpactants : IBuild
         {
             public interface IResult : ICompteCible, IBuild
@@ -34,7 +40,7 @@ namespace AtelierBuilders.Builders
             {
             }
 
-            IResult Population(PopulationBuilder.IBuild builder);
+            IResult Population(Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild> configureBuilder);
         }
         
         public interface IBuild
@@ -45,9 +51,17 @@ namespace AtelierBuilders.Builders
         
         private Compte _compteCible = Comptes.Cp2020;
         private IReadOnlyCollection<Compte> _comptesImpactants = new[] {Comptes.Maladie};
+        private readonly int _idReglementaire;
+        private Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild> _configurePopulationBuilder;
 
-        private PopulationBuilder.IBuild _populationBuilder;
+        private RegleRegulBuilder(int idReglementaire)
+        {
+            _idReglementaire = idReglementaire;
+        }
 
+        public static IRacine Reglementaire(int idReglementaire) => 
+            new RegleRegulBuilder(idReglementaire);
+        
         public ICompteCible.IResult CompteCible(Compte compte)
         {
             _compteCible = compte;
@@ -64,9 +78,9 @@ namespace AtelierBuilders.Builders
             return this;
         }
 
-        public IPopulation.IResult Population(PopulationBuilder.IBuild builder)
+        public IPopulation.IResult Population(Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild> configureBuilder)
         {
-            _populationBuilder = builder;
+            _configurePopulationBuilder = configureBuilder;
             return this;
         }
 
@@ -80,7 +94,11 @@ namespace AtelierBuilders.Builders
             return new RegleRegul
             {
                 Id = 1,
-                Population = _populationBuilder?.Build() ?? defaultPopulation,
+                IdReglementaire = _idReglementaire,
+                Population = 
+                    _configurePopulationBuilder != null
+                        ? _configurePopulationBuilder(PopulationBuilder.Reglementaire(_idReglementaire)).Build()
+                        : defaultPopulation,
                 CompteCible = _compteCible,
                 ComptesImpactants = _comptesImpactants
             };

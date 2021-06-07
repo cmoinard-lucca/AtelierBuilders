@@ -7,5 +7,6 @@ namespace AtelierBuilders.Models
         public IReadOnlyCollection<int> IdsProfils { get; set; }
         public IReadOnlyCollection<int> IdsEntiteLegales { get; set; }
         public IReadOnlyCollection<int> IdsDepartements { get; set; }
+        public int IdReglementaire { get; set; }
     }
 }

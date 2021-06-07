@@ -9,15 +9,17 @@ namespace AtelierBuilders
         static void Main(string[] args)
         {
             var pop =
-                PopulationBuilder.Declare()
+                PopulationBuilder
+                    .Reglementaire(3)
                     .Profils(2)
                     .Departements(83, 0100)
                     .Build();
             var regul =
-                new RegleRegulBuilder()
+                RegleRegulBuilder
+                    .Reglementaire(3)
                     .ComptesImpactants(Comptes.Teletravail, Comptes.FormationInterne)
                     .CompteCible(Comptes.Rtt)
-                    .Population(PopulationBuilder.Declare().Profils(2).Departements(101, 383))
+                    .Population(p => p.Profils(2).Departements(101, 383))
                     .Build();
             
             Console.WriteLine("Hello World!");

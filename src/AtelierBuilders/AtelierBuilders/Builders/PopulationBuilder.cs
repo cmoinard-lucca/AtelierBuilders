@@ -11,18 +11,18 @@ namespace AtelierBuilders.Builders
         PopulationBuilder.IDepartements, PopulationBuilder.IDepartements.IResult,
         PopulationBuilder.IBuild
     {
+        private readonly int _idReglementaire;
         private IReadOnlyCollection<int> _idsProfils = new List<int>();
         private IReadOnlyCollection<int> _idsEntitesLegales = new List<int>();
         private IReadOnlyCollection<int> _idsDepartements;
 
-        private PopulationBuilder()
+        private PopulationBuilder(int idReglementaire)
         {
+            _idReglementaire = idReglementaire;
         }
 
-        public static IRacine Declare()
-        {
-            return new PopulationBuilder();
-        }
+        public static IRacine Reglementaire(int reglementaireId) => 
+            new PopulationBuilder(reglementaireId);
 
         public interface IRacine : IProfils
         {
@@ -81,6 +81,7 @@ namespace AtelierBuilders.Builders
         public Population Build() =>
             new Population
             {
+                IdReglementaire = _idReglementaire,
                 IdsProfils = _idsProfils,
                 IdsEntiteLegales = _idsEntitesLegales,
                 IdsDepartements = _idsDepartements
