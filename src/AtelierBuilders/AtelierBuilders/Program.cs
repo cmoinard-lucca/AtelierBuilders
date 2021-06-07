@@ -18,7 +18,7 @@ namespace AtelierBuilders
                 RegleRegulBuilder
                     .Reglementaire(3)
                     .ComptesImpactants(Comptes.Teletravail, Comptes.FormationInterne)
-                    .CompteCible(Comptes.Rtt)
+                    .CategorieCompteCible(Comptes.CongesPayes)
                     .Population(p => p.Profils(2).Departements(101, 383))
                     .AvecSeuilConsecutif()
                     .Seuil(30)

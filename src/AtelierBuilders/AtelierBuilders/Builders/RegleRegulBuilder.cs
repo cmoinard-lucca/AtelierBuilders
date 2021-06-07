@@ -7,7 +7,7 @@ namespace AtelierBuilders.Builders
 {
     public class RegleRegulBuilder :
         RegleRegulBuilder.IRacine,
-        RegleRegulBuilder.IComptesImpactants, RegleRegulBuilder.IComptesImpactants.IResult, 
+        RegleRegulBuilder.IComptesImpactants, RegleRegulBuilder.IComptesImpactants.IResult,
         RegleRegulBuilder.ICompteCible, RegleRegulBuilder.ICompteCible.IResult,
         RegleRegulBuilder.IPopulation, RegleRegulBuilder.IPopulation.IResult,
         RegleRegulBuilder.IConsecutivite, RegleRegulBuilder.IConsecutivite.IResult,
@@ -19,7 +19,7 @@ namespace AtelierBuilders.Builders
         public interface IRacine : IComptesImpactants, ICompteCible, IPopulation, IBuild
         {
         }
-        
+
         public interface IComptesImpactants
         {
             public interface IResult : ICompteCible, IPopulation, IConsecutivite, IBuild
@@ -28,7 +28,7 @@ namespace AtelierBuilders.Builders
 
             IResult ComptesImpactants(Compte compte1, params Compte[] autresComptes);
         }
-        
+
         public interface ICompteCible
         {
             public interface IResult : IPopulation, IConsecutivite, IBuild
@@ -36,8 +36,9 @@ namespace AtelierBuilders.Builders
             }
 
             IResult CompteCible(Compte compte);
+            IResult CategorieCompteCible(CategorieCompte categorieCompte);
         }
-        
+
         public interface IPopulation
         {
             public interface IResult : IConsecutivite, IBuild
@@ -46,7 +47,7 @@ namespace AtelierBuilders.Builders
 
             IResult Population(Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild> configureBuilder);
         }
-        
+
         public interface IConsecutivite
         {
             public interface IResult : ISeuil, IPlafond
@@ -56,7 +57,7 @@ namespace AtelierBuilders.Builders
             IResult AvecSeuilConsecutif();
             IResult AvecSeuilNonConsecutif();
         }
-        
+
         public interface ISeuil
         {
             public interface IResult : IPlafond, IModePeriodeSeuil, IBuild
@@ -65,7 +66,7 @@ namespace AtelierBuilders.Builders
 
             IResult Seuil(int seuil);
         }
-        
+
         public interface IPlafond
         {
             public interface IResult : IModePeriodeSeuil, IBuild
@@ -74,7 +75,7 @@ namespace AtelierBuilders.Builders
 
             IResult Plafond(int plafond);
         }
-        
+
         public interface IModePeriodeSeuil
         {
             public interface IResult : IBuild
@@ -83,16 +84,17 @@ namespace AtelierBuilders.Builders
 
             IResult Mode(ModePeriodeSeuil mode);
         }
-        
+
         public interface IBuild
         {
             RegleRegul Build();
         }
-        
-        private Compte _compteCible = Comptes.Cp2020;
+
+        private Compte? _compteCible;
+        private CategorieCompte? _categorieCompteCible;
         private IReadOnlyCollection<Compte> _comptesImpactants = new[] {Comptes.Maladie};
         private readonly int _idReglementaire;
-        private Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild> _configurePopulationBuilder;
+        private Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild>? _configurePopulationBuilder;
         private bool _consecutivite = true;
         private int? _seuil;
         private int? _plafond;
@@ -103,12 +105,18 @@ namespace AtelierBuilders.Builders
             _idReglementaire = idReglementaire;
         }
 
-        public static IRacine Reglementaire(int idReglementaire) => 
+        public static IRacine Reglementaire(int idReglementaire) =>
             new RegleRegulBuilder(idReglementaire);
-        
+
         public ICompteCible.IResult CompteCible(Compte compte)
         {
             _compteCible = compte;
+            return this;
+        }
+
+        public ICompteCible.IResult CategorieCompteCible(CategorieCompte categorieCompte)
+        {
+            _categorieCompteCible = categorieCompte;
             return this;
         }
 
@@ -122,7 +130,8 @@ namespace AtelierBuilders.Builders
             return this;
         }
 
-        public IPopulation.IResult Population(Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild> configureBuilder)
+        public IPopulation.IResult Population(
+            Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild> configureBuilder)
         {
             _configurePopulationBuilder = configureBuilder;
             return this;
@@ -164,16 +173,22 @@ namespace AtelierBuilders.Builders
             {
                 IdsProfils = new[] {1}
             };
-            
+
+            var compteCible =
+                _categorieCompteCible == null && _compteCible == null
+                    ? Comptes.Cp2020
+                    : _compteCible;
+
             return new RegleRegul
             {
                 Id = 1,
                 IdReglementaire = _idReglementaire,
-                Population = 
+                Population =
                     _configurePopulationBuilder != null
                         ? _configurePopulationBuilder(PopulationBuilder.Reglementaire(_idReglementaire)).Build()
                         : defaultPopulation,
-                CompteCible = _compteCible,
+                CompteCible = compteCible,
+                CategorieCompteCible = _categorieCompteCible,
                 ComptesImpactants = _comptesImpactants,
                 Consecutivite = _consecutivite,
                 Seuil = _seuil,
