@@ -8,6 +8,11 @@ namespace AtelierBuilders
     {
         static void Main(string[] args)
         {
+            var pop =
+                PopulationBuilder.Declare()
+                    .Profils(2)
+                    .Departements(83, 0100)
+                    .Build();
             var regul =
                 new RegleRegulBuilder()
                     .ComptesImpactants(Comptes.Teletravail, Comptes.FormationInterne)
