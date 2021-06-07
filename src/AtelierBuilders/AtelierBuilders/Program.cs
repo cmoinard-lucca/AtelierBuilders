@@ -17,6 +17,7 @@ namespace AtelierBuilders
                 new RegleRegulBuilder()
                     .ComptesImpactants(Comptes.Teletravail, Comptes.FormationInterne)
                     .CompteCible(Comptes.Rtt)
+                    .Population(PopulationBuilder.Declare().Profils(2).Departements(101, 383))
                     .Build();
             
             Console.WriteLine("Hello World!");

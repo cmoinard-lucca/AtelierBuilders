@@ -7,6 +7,7 @@ namespace AtelierBuilders.Builders
     public class RegleRegulBuilder :
         RegleRegulBuilder.IComptesImpactants, RegleRegulBuilder.IComptesImpactants.IResult, 
         RegleRegulBuilder.ICompteCible, RegleRegulBuilder.ICompteCible.IResult,
+        RegleRegulBuilder.IPopulation, RegleRegulBuilder.IPopulation.IResult,
         RegleRegulBuilder.IBuild
     {
         public interface IComptesImpactants : IBuild
@@ -20,11 +21,20 @@ namespace AtelierBuilders.Builders
         
         public interface ICompteCible
         {
-            public interface IResult : IBuild
+            public interface IResult : IPopulation, IBuild
             {
             }
 
             IResult CompteCible(Compte compte);
+        }
+        
+        public interface IPopulation
+        {
+            public interface IResult : IBuild
+            {
+            }
+
+            IResult Population(PopulationBuilder.IBuild builder);
         }
         
         public interface IBuild
@@ -36,10 +46,7 @@ namespace AtelierBuilders.Builders
         private Compte _compteCible = Comptes.Cp2020;
         private IReadOnlyCollection<Compte> _comptesImpactants = new[] {Comptes.Maladie};
 
-        private Population _population = new Population
-        {
-            IdsProfils = new[] {1}
-        };
+        private PopulationBuilder.IBuild _populationBuilder;
 
         public ICompteCible.IResult CompteCible(Compte compte)
         {
@@ -57,13 +64,26 @@ namespace AtelierBuilders.Builders
             return this;
         }
 
-        public RegleRegul Build() =>
-            new RegleRegul
+        public IPopulation.IResult Population(PopulationBuilder.IBuild builder)
+        {
+            _populationBuilder = builder;
+            return this;
+        }
+
+        public RegleRegul Build()
+        {
+            var defaultPopulation = new Population
+            {
+                IdsProfils = new[] {1}
+            };
+            
+            return new RegleRegul
             {
                 Id = 1,
-                Population = _population,
+                Population = _populationBuilder?.Build() ?? defaultPopulation,
                 CompteCible = _compteCible,
                 ComptesImpactants = _comptesImpactants
             };
+        }
     }
 }
