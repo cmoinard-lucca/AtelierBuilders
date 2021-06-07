@@ -10,8 +10,8 @@ namespace AtelierBuilders
         {
             var regul =
                 new RegleRegulBuilder()
-                    .CompteCible(Comptes.Rtt)
                     .ComptesImpactants(Comptes.Teletravail, Comptes.FormationInterne)
+                    .CompteCible(Comptes.Rtt)
                     .Build();
             
             Console.WriteLine("Hello World!");
