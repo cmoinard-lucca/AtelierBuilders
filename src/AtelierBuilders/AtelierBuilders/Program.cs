@@ -20,6 +20,10 @@ namespace AtelierBuilders
                     .ComptesImpactants(Comptes.Teletravail, Comptes.FormationInterne)
                     .CompteCible(Comptes.Rtt)
                     .Population(p => p.Profils(2).Departements(101, 383))
+                    .AvecSeuilConsecutif()
+                    .Seuil(30)
+                    .Plafond(90)
+                    .Mode(ModePeriodeSeuil.Depuis12Mois)
                     .Build();
             
             Console.WriteLine("Hello World!");
