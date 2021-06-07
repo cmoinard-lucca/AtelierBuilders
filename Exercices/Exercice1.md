@@ -69,3 +69,68 @@ Convertir le builder actuel en Builder Fluent pour pouvoir guider la constructio
 4. Build
 
 S'assurer qu'on puisse appeler Build à chaque étape.
+
+
+## Étape 3 : Population
+
+Maintenant, c'est la population qu'on aimerait pouvoir paramétrer dans le builder.
+
+On pourrait très bien faire une méthode comme ce code :
+```csharp
+RegulBuilder Population(Population population)
+```
+
+... mais ça oblige dans les tests à instancier la population et ça peut vite rendre le code verbeux :
+
+```csharp
+var regul =
+    new RegulBuilder()
+        .ComptesImpactants(Comptes.Maladie, Comptes.Teletravail)
+        .CompteCible(Comptes.Rtt)
+        .Population(new Population {
+            LegalEntityIds = new [] { 1 },
+            ProfileIds = new [] { 2, 3 }
+        })
+        .Build();
+```
+
+Même remarque avec les paramètres optionnels même si c'est un poil moins verbeux
+
+```csharp
+RegulBuilder Population(
+    IReadOnlyCollection<int> legalEntityIds = null,
+    IReadOnlyCollection<int> departementIds = null,
+    IReadOnlyCollection<int> profilesIds = null
+);
+
+
+var regul =
+    new RegulBuilder()
+        .ComptesImpactants(Comptes.Maladie, Comptes.Teletravail)
+        .CompteCible(Comptes.Rtt)
+        .Population(
+            legalEntityIds: new [] { 1 },
+            profileIds = new [] { 2, 3 }
+        })
+        .Build();
+```
+
+Mais en dehors de la verbosité, on a un plus gros problème dans les tests. En effet, on se rend compte que la valeur du profil change quasiment pour chaque test et donc pas moyen d'en sortir une valeur par défaut pertinente. Autre point important, les règles métier ont un peu changé et il faut maintenant au moins un profil. Les départements et entités légales peuvent ne pas être renseignées.
+
+### Instruction 1
+
+Créer un builder fluent pour la population obligeant à saisir au moins un profil.
+
+
+### Instruction 2
+
+Utiliser le builder de population dans le builder principal en s'assurant que le Build du builder de population est bien appelé lors du Build du builder principal.
+
+
+### Instruction 3 (optionnel)
+
+Nouvelle demande, on a besoin de l'identifiant du réglementaire dans la règle de régul. Cet identifiant de réglementaire est obligatoire et doit être renseigné au tout début du builder. Le rajouter dans le builder, cette étape est obligatoire et il n'y a pas de valeur par défaut.
+
+Ce réglementaire est lié à certaines entités légales et le code utilisant nos règles de régul a besoin de vérifier si les entités légales de la population sont bien comprises dans le réglementaire. Ce qui veut dire que la population doit aussi avoir cet identifiant de réglementaire renseigné. Le rajouter dans le builder de population, cette étape est obligatoire et il n'y a pas de valeur par défaut.
+
+S'assurer qu'on ne puisse pas renseigner un id de réglementaire dans le builder de population qui soit différent de celui renseigné par le builder principal. Essayez de résoudre cette contrainte non pas avec une exception, mais juste par design.
