@@ -25,6 +25,13 @@ namespace AtelierBuilders
                         .Plafond(90)
                         .ModePeriod(ModePeriodeSeuil.Depuis12Mois))
                     .Build();
+            var regul2 =
+                RegleRegulBuilder
+                    .Reglementaire(3)
+                    .MoinsDeCongesSiMaladie()
+                    .Population(p => p.Profils(2).Departements(101, 383))
+                    .SeuilConsecutif30()
+                    .Build();
             
             Console.WriteLine("Hello World!");
         }
