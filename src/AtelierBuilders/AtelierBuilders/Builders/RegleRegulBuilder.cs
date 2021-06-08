@@ -35,8 +35,7 @@ namespace AtelierBuilders.Builders
             {
             }
 
-            IResult CompteCible(Compte compte);
-            IResult CategorieCompteCible(CategorieCompte categorieCompte);
+            IResult CompteCible(CompteCibleBase compteCible);
         }
 
         public interface IPopulation
@@ -90,8 +89,7 @@ namespace AtelierBuilders.Builders
             RegleRegul Build();
         }
 
-        private Compte? _compteCible;
-        private CategorieCompte? _categorieCompteCible;
+        private CompteCibleBase _compteCible = new CompteCible(Comptes.Cp2020);
         private IReadOnlyCollection<Compte> _comptesImpactants = new[] {Comptes.Maladie};
         private readonly int _idReglementaire;
         private Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild>? _configurePopulationBuilder;
@@ -108,15 +106,9 @@ namespace AtelierBuilders.Builders
         public static IRacine Reglementaire(int idReglementaire) =>
             new RegleRegulBuilder(idReglementaire);
 
-        public ICompteCible.IResult CompteCible(Compte compte)
+        public ICompteCible.IResult CompteCible(CompteCibleBase compteCible)
         {
-            _compteCible = compte;
-            return this;
-        }
-
-        public ICompteCible.IResult CategorieCompteCible(CategorieCompte categorieCompte)
-        {
-            _categorieCompteCible = categorieCompte;
+            _compteCible = compteCible;
             return this;
         }
 
@@ -174,11 +166,6 @@ namespace AtelierBuilders.Builders
                 IdsProfils = new[] {1}
             };
 
-            var compteCible =
-                _categorieCompteCible == null && _compteCible == null
-                    ? Comptes.Cp2020
-                    : _compteCible;
-
             return new RegleRegul
             {
                 Id = 1,
@@ -187,8 +174,7 @@ namespace AtelierBuilders.Builders
                     _configurePopulationBuilder != null
                         ? _configurePopulationBuilder(PopulationBuilder.Reglementaire(_idReglementaire)).Build()
                         : defaultPopulation,
-                CompteCible = compteCible,
-                CategorieCompteCible = _categorieCompteCible,
+                CompteCible = _compteCible,
                 ComptesImpactants = _comptesImpactants,
                 Consecutivite = _consecutivite,
                 Seuil = _seuil,
