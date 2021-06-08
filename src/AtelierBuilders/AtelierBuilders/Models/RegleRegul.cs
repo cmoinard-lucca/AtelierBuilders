@@ -9,9 +9,6 @@ namespace AtelierBuilders.Models
         public IReadOnlyCollection<Compte> ComptesImpactants { get; set; } = new List<Compte>();
         public Population Population { get; set; } = new Population();
         public int IdReglementaire { get; set; }
-        public int? Seuil { get; set; }
-        public int? Plafond { get; set; }
-        public bool Consecutivite { get; set; }
-        public ModePeriodeSeuil ModePeriodeSeuil { get; set; }
+        public ConfigurationSeuil? ConfigurationSeuil { get; set; }
     }
 }

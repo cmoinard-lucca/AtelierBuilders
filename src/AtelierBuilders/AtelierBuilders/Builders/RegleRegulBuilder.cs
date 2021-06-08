@@ -10,10 +10,7 @@ namespace AtelierBuilders.Builders
         RegleRegulBuilder.IComptesImpactants, RegleRegulBuilder.IComptesImpactants.IResult,
         RegleRegulBuilder.ICompteCible, RegleRegulBuilder.ICompteCible.IResult,
         RegleRegulBuilder.IPopulation, RegleRegulBuilder.IPopulation.IResult,
-        RegleRegulBuilder.IConsecutivite, RegleRegulBuilder.IConsecutivite.IResult,
-        RegleRegulBuilder.ISeuil, RegleRegulBuilder.ISeuil.IResult,
-        RegleRegulBuilder.IPlafond, RegleRegulBuilder.IPlafond.IResult,
-        RegleRegulBuilder.IModePeriodeSeuil, RegleRegulBuilder.IModePeriodeSeuil.IResult,
+        RegleRegulBuilder.IConfigurationSeuil, RegleRegulBuilder.IConfigurationSeuil.IResult,
         RegleRegulBuilder.IBuild
     {
         public interface IRacine : IComptesImpactants, ICompteCible, IPopulation, IBuild
@@ -22,7 +19,7 @@ namespace AtelierBuilders.Builders
 
         public interface IComptesImpactants
         {
-            public interface IResult : ICompteCible, IPopulation, IConsecutivite, IBuild
+            public interface IResult : ICompteCible, IPopulation, IConfigurationSeuil, IBuild
             {
             }
 
@@ -31,7 +28,7 @@ namespace AtelierBuilders.Builders
 
         public interface ICompteCible
         {
-            public interface IResult : IPopulation, IConsecutivite, IBuild
+            public interface IResult : IPopulation, IConfigurationSeuil, IBuild
             {
             }
 
@@ -40,50 +37,23 @@ namespace AtelierBuilders.Builders
 
         public interface IPopulation
         {
-            public interface IResult : IConsecutivite, IBuild
+            public interface IResult : IConfigurationSeuil, IBuild
             {
             }
 
             IResult Population(Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild> configureBuilder);
         }
-
-        public interface IConsecutivite
-        {
-            public interface IResult : ISeuil, IPlafond
-            {
-            }
-
-            IResult AvecSeuilConsecutif();
-            IResult AvecSeuilNonConsecutif();
-        }
-
-        public interface ISeuil
-        {
-            public interface IResult : IPlafond, IModePeriodeSeuil, IBuild
-            {
-            }
-
-            IResult Seuil(int seuil);
-        }
-
-        public interface IPlafond
-        {
-            public interface IResult : IModePeriodeSeuil, IBuild
-            {
-            }
-
-            IResult Plafond(int plafond);
-        }
-
-        public interface IModePeriodeSeuil
+        
+        public interface IConfigurationSeuil
         {
             public interface IResult : IBuild
             {
             }
 
-            IResult Mode(ModePeriodeSeuil mode);
+            IResult AvecSeuilConsecutif(Func<ConfigurationSeuil.IRacine, ConfigurationSeuil.IBuild> configureBuilder);
+            IResult AvecSeuilNonConsecutif(Func<ConfigurationSeuil.IRacine, ConfigurationSeuil.IBuild> configureBuilder);
         }
-
+        
         public interface IBuild
         {
             RegleRegul Build();
@@ -93,10 +63,7 @@ namespace AtelierBuilders.Builders
         private IReadOnlyCollection<Compte> _comptesImpactants = new[] {Comptes.Maladie};
         private readonly int _idReglementaire;
         private Func<PopulationBuilder.IRacine, PopulationBuilder.IBuild>? _configurePopulationBuilder;
-        private bool _consecutivite = true;
-        private int? _seuil;
-        private int? _plafond;
-        private ModePeriodeSeuil _modeSeuil = ModePeriodeSeuil.PeriodeCourante;
+        private ConfigurationSeuil.IBuild? _configureSeuilBuilder;
 
         private RegleRegulBuilder(int idReglementaire)
         {
@@ -129,33 +96,15 @@ namespace AtelierBuilders.Builders
             return this;
         }
 
-        public IConsecutivite.IResult AvecSeuilConsecutif()
+        public IConfigurationSeuil.IResult AvecSeuilConsecutif(Func<ConfigurationSeuil.IRacine, ConfigurationSeuil.IBuild> configureBuilder)
         {
-            _consecutivite = true;
+            _configureSeuilBuilder = configureBuilder(ConfigurationSeuil.Consecutif());
             return this;
         }
 
-        public IConsecutivite.IResult AvecSeuilNonConsecutif()
+        public IConfigurationSeuil.IResult AvecSeuilNonConsecutif(Func<ConfigurationSeuil.IRacine, ConfigurationSeuil.IBuild> configureBuilder)
         {
-            _consecutivite = false;
-            return this;
-        }
-
-        public ISeuil.IResult Seuil(int seuil)
-        {
-            _seuil = seuil;
-            return this;
-        }
-
-        public IPlafond.IResult Plafond(int plafond)
-        {
-            _plafond = plafond;
-            return this;
-        }
-
-        public IModePeriodeSeuil.IResult Mode(ModePeriodeSeuil mode)
-        {
-            _modeSeuil = mode;
+            _configureSeuilBuilder = configureBuilder(ConfigurationSeuil.NonConsecutif());
             return this;
         }
 
@@ -176,10 +125,7 @@ namespace AtelierBuilders.Builders
                         : defaultPopulation,
                 CompteCible = _compteCible,
                 ComptesImpactants = _comptesImpactants,
-                Consecutivite = _consecutivite,
-                Seuil = _seuil,
-                Plafond = _plafond,
-                ModePeriodeSeuil = _modeSeuil
+                ConfigurationSeuil = _configureSeuilBuilder?.Build()
             };
         }
     }
